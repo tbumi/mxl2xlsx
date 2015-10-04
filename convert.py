@@ -3,6 +3,7 @@
 import sys
 import math
 from collections import deque
+from copy import copy
 
 import xlsxwriter
 import xml.etree.ElementTree as ET
@@ -23,39 +24,59 @@ divisions = float(attributes.find('divisions').text)
 #time_signature = attributes.find('./time') # TODO: save time signature
 
 note_queue = deque()
+beat_counter = 0
+tie_start = False
 
 # import pdb;pdb.set_trace()
 
-for note in part_angklung.findall('measure/note'):
-    if note.find('pitch') is not None:
-        step = note.find('pitch/step').text
-        try:
-            alter = note.find('pitch/alter').text
-        except AttributeError:
-            alter = '0'
-        octave = note.find('pitch/octave').text
-    elif note.find('rest') is not None:
-        step = '0'
-        alter = ''
-        octave = ''
-    else:
-        # import pdb;pdb.set_trace()
-        sys.exit("Invalid MusicXML")
+for measure in part_angklung:
+    for child in measure:
+        if child.tag == 'note':
+            note = child # for easier code reading
+            new_note = {}
 
-    duration = float(note.find('duration').text)/divisions
-    if note.find('dot'):
-        duration *= 1.5
+            if note.find('pitch') is not None:
+                new_note['type'] = 'pitch'
+                new_note['step'] = note.find('pitch/step').text
+                try:
+                    new_note['alter'] = int(note.find('pitch/alter').text)
+                except AttributeError:
+                    new_note['alter'] = 0
+                new_note['octave'] = int(note.find('pitch/octave').text)
+            elif note.find('rest') is not None:
+                new_note['type'] = 'rest'
+            else:
+                # import pdb;pdb.set_trace()
+                sys.exit("Invalid MusicXML")
 
-    tie_tags = note.findall('tie')
-    for tie_tag in tie_tags:
-        if tie_tag.get('type') == 'stop':
-            (step, alter, octave, duration_prev) = tie_note
-            duration += duration_prev
-        if tie_tag.get('type') == 'start':
-            tie_note = (step, alter, octave, duration)
-            continue
+            new_note['duration'] = float(note.find('duration').text)/divisions
+            if note.find('dot'):
+                new_note['duration'] *= 1.5
 
-    note_queue.append((step, alter, octave, duration))
+            tie_tags = note.findall('tie')
+            for tie_tag in tie_tags:
+                if tie_tag.get('type') == 'stop':
+                    new_note = copy(tie_note)
+                    new_note['duration'] += tie_note['duration']
+                if tie_tag.get('type') == 'start':
+                    tie_note = copy(new_note)
+                    tie_start = True
+            if tie_start:
+                continue
+
+            if note.find('chord') is not None:
+                beat_counter -= new_note['duration']
+
+            new_note['position'] = beat_counter
+
+            note_queue.append(new_note)
+            beat_counter += new_note['duration']
+
+        elif child.tag == 'backup':
+            beat_counter -= float(child.find('duration').text)/divisions
+
+print(note_queue)
+sys.exit()
 
 music_score = []
 beat_duration = 0

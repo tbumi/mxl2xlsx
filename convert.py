@@ -1,8 +1,11 @@
 #!/usr/bin/env python
 
+import pprint
+print = pprint.pprint
+
 import sys
 import math
-from collections import deque
+# from collections import deque
 from copy import copy
 
 import xlsxwriter
@@ -19,11 +22,12 @@ score_partwise = mxml.getroot()
 part_angklung = score_partwise.find('part')
 
 attributes = part_angklung.find('measure/attributes')
-divisions = float(attributes.find('divisions').text)
-#key_signature = attributes.find('./key/fifths').text # TODO: handle key signature
-#time_signature = attributes.find('./time') # TODO: save time signature
+divisions = int(attributes.find('divisions').text)
+# print(divisions)
+#time_signature = attributes.find('./time') # TODO: save time signature data
 
-note_queue = deque()
+note_queue = []
+key_signature_list = []
 beat_counter = 0
 tie_start = False
 
@@ -31,7 +35,14 @@ tie_start = False
 
 for measure in part_angklung:
     for child in measure:
-        if child.tag == 'note':
+        if child.tag == 'attributes':
+            if child.find('key/fifths') is not None:
+                key_signature_list.append({
+                    'key_signature': child.find('key/fifths').text,
+                    'position': beat_counter
+                    })
+
+        elif child.tag == 'note':
             note = child # for easier code reading
             new_note = {}
 
@@ -49,7 +60,7 @@ for measure in part_angklung:
                 # import pdb;pdb.set_trace()
                 sys.exit("Invalid MusicXML")
 
-            new_note['duration'] = float(note.find('duration').text)/divisions
+            new_note['duration'] = int(note.find('duration').text)
             if note.find('dot'):
                 new_note['duration'] *= 1.5
 
@@ -73,42 +84,35 @@ for measure in part_angklung:
             beat_counter += new_note['duration']
 
         elif child.tag == 'backup':
-            beat_counter -= float(child.find('duration').text)/divisions
+            beat_counter -= int(child.find('duration').text)
 
-print(note_queue)
+# print(note_queue, width=100, compact=True)
+# print(key_signature_list, width=100, compact=True)
+# print(beat_counter)
 sys.exit()
 
-music_score = []
-beat_duration = 0
-beat = []
-one_beat_duration = 1.0 # just to make clear wkwk
+music_score = [[]]
+for i in range(beat_counter):
+    music_score[0].append(0)
 
 while note_queue:
-    note = note_queue.popleft()
-    step, alter, octave, duration = note
-    if beat_duration + duration > one_beat_duration:
-        new_beats = deque()
-        remaining_duration = (beat_duration + duration) - one_beat_duration
-        new_beats.appendleft((step, alter, octave, duration - remaining_duration))
+    note = note_queue.pop()
+    if note['type'] == 'pitch':
+        line = 0
+        while music_score[line][note['position']] != 0:
+            line += 1
+            try:
+                music_score[line]
+            except IndexError:
+                music_score.append([])
+                for i in range(beat_counter):
+                    music_score[line].append(0)
+        for i in range(note['position'], note['position'] + note['duration']):
+            new_note = {
+                'step': note['step'],
+                'alter': note['alter'],
+                'octave': note['octave']
+            }
+            music_score[line][i] = new_note
 
-        if step == '0':
-            continuation = '0'
-        else:
-            continuation = '.'
-
-        while remaining_duration > one_beat_duration:
-            new_beats.appendleft((continuation, '', '', one_beat_duration))
-            remaining_duration -= one_beat_duration
-        if remaining_duration > 0:
-            new_beats.appendleft((continuation, '', '', remaining_duration))
-        note_queue.extendleft(new_beats)
-        continue
-    
-    beat.append(note)
-    beat_duration += duration
-    if beat_duration == one_beat_duration:
-        music_score.append(beat)
-        beat = []
-        beat_duration = 0
-
-print(music_score)
+print(music_score, width=100, compact=True)

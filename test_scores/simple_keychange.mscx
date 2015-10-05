@@ -246,6 +246,40 @@
             <tpc>13</tpc>
             </Note>
           </Chord>
+        </Measure>
+      <Measure number="5">
+        <KeySig>
+          <accidental>0</accidental>
+          </KeySig>
+        <Rest>
+          <durationType>quarter</durationType>
+          </Rest>
+        <Chord>
+          <durationType>quarter</durationType>
+          <Note>
+            <pitch>69</pitch>
+            <tpc>17</tpc>
+            </Note>
+          </Chord>
+        <Rest>
+          <durationType>quarter</durationType>
+          </Rest>
+        <Chord>
+          <durationType>quarter</durationType>
+          <Note>
+            <pitch>60</pitch>
+            <tpc>14</tpc>
+            </Note>
+          </Chord>
+        </Measure>
+      <Measure number="6">
+        <Chord>
+          <durationType>whole</durationType>
+          <Note>
+            <pitch>72</pitch>
+            <tpc>14</tpc>
+            </Note>
+          </Chord>
         <BarLine>
           <subtype>end</subtype>
           <span>1</span>

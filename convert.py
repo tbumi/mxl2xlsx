@@ -5,8 +5,9 @@ print = pprint.pprint
 
 import sys
 import math
-# from collections import deque
 from copy import copy
+
+from utils import absolute2relative
 
 import xlsxwriter
 import xml.etree.ElementTree as ET
@@ -38,7 +39,7 @@ for measure in part_angklung:
         if child.tag == 'attributes':
             if child.find('key/fifths') is not None:
                 key_signature_list.append({
-                    'key_signature': child.find('key/fifths').text,
+                    'key_signature': int(child.find('key/fifths').text),
                     'position': beat_counter
                     })
 
@@ -89,7 +90,7 @@ for measure in part_angklung:
 # print(note_queue, width=100, compact=True)
 # print(key_signature_list, width=100, compact=True)
 # print(beat_counter)
-sys.exit()
+# sys.exit()
 
 music_score = [[]]
 for i in range(beat_counter):
@@ -107,12 +108,13 @@ while note_queue:
                 music_score.append([])
                 for i in range(beat_counter):
                     music_score[line].append(0)
+        for i in range(len(key_signature_list) - 1, -1, -1):
+            if note['position'] >= key_signature_list[i]['position']:
+                keysig = key_signature_list[i]['key_signature']
+                break
+        else:
+            raise Exception('key signature not found')
         for i in range(note['position'], note['position'] + note['duration']):
-            new_note = {
-                'step': note['step'],
-                'alter': note['alter'],
-                'octave': note['octave']
-            }
-            music_score[line][i] = new_note
+            music_score[line][i] = absolute2relative(keysig, note['step'], note['alter'], note['octave'])
 
 print(music_score, width=100, compact=True)

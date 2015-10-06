@@ -68,8 +68,10 @@ for measure in part_angklung:
             tie_tags = note.findall('tie')
             for tie_tag in tie_tags:
                 if tie_tag.get('type') == 'stop':
+                    old_duration = new_note['duration']
                     new_note = copy(tie_note)
-                    new_note['duration'] += tie_note['duration']
+                    new_note['duration'] = old_duration + tie_note['duration']
+                    tie_start = False
                 if tie_tag.get('type') == 'start':
                     tie_note = copy(new_note)
                     tie_start = True

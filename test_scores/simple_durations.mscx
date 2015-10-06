@@ -240,16 +240,13 @@
             </Note>
           </Chord>
         <Chord>
-          <durationType>quarter</durationType>
+          <durationType>half</durationType>
           <Note>
             <endSpanner id="3"/>
             <pitch>72</pitch>
             <tpc>14</tpc>
             </Note>
           </Chord>
-        <Rest>
-          <durationType>quarter</durationType>
-          </Rest>
         <BarLine>
           <subtype>end</subtype>
           <span>1</span>

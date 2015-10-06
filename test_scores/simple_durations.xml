@@ -7,7 +7,7 @@
   <identification>
     <encoding>
       <software>MuseScore 2.0.2</software>
-      <encoding-date>2015-10-06</encoding-date>
+      <encoding-date>2015-10-07</encoding-date>
       <supports element="accidental" type="yes"/>
       <supports element="beam" type="yes"/>
       <supports element="print" attribute="new-page" type="yes" value="yes"/>
@@ -59,7 +59,7 @@
       </score-part>
     </part-list>
   <part id="P1">
-    <measure number="1" width="303.07">
+    <measure number="1" width="306.34">
       <print>
         <system-layout>
           <system-margins>
@@ -93,7 +93,7 @@
         <type>half</type>
         <stem>down</stem>
         </note>
-      <note default-x="161.24" default-y="-20.00">
+      <note default-x="162.47" default-y="-20.00">
         <pitch>
           <step>B</step>
           <alter>-1</alter>
@@ -105,7 +105,7 @@
         <accidental>flat</accidental>
         <stem>down</stem>
         </note>
-      <note default-x="223.56" default-y="-25.00">
+      <note default-x="225.70" default-y="-25.00">
         <pitch>
           <step>A</step>
           <octave>4</octave>
@@ -116,7 +116,7 @@
         <stem>up</stem>
         <beam number="1">begin</beam>
         </note>
-      <note default-x="262.52" default-y="-25.00">
+      <note default-x="265.22" default-y="-25.00">
         <pitch>
           <step>A</step>
           <octave>4</octave>
@@ -128,7 +128,7 @@
         <beam number="1">end</beam>
         </note>
       </measure>
-    <measure number="2" width="275.79">
+    <measure number="2" width="279.05">
       <note default-x="12.00" default-y="-30.00">
         <pitch>
           <step>G</step>
@@ -146,7 +146,7 @@
         <voice>1</voice>
         <type>eighth</type>
         </note>
-      <note default-x="129.00" default-y="-15.00">
+      <note default-x="130.46" default-y="-15.00">
         <pitch>
           <step>C</step>
           <alter>1</alter>
@@ -172,7 +172,7 @@
         <type>quarter</type>
         </note>
       </measure>
-    <measure number="3" width="244.43">
+    <measure number="3" width="247.69">
       <note default-x="12.00" default-y="-15.00">
         <pitch>
           <step>C</step>
@@ -183,7 +183,7 @@
         <type>eighth</type>
         <stem>down</stem>
         </note>
-      <note default-x="45.94" default-y="-25.00">
+      <note default-x="46.42" default-y="-25.00">
         <pitch>
           <step>A</step>
           <octave>4</octave>
@@ -205,7 +205,7 @@
         <voice>1</voice>
         <type>quarter</type>
         </note>
-      <note default-x="188.51" default-y="-25.00">
+      <note default-x="191.01" default-y="-25.00">
         <pitch>
           <step>A</step>
           <octave>4</octave>
@@ -220,7 +220,7 @@
           </notations>
         </note>
       </measure>
-    <measure number="4" width="254.21">
+    <measure number="4" width="244.42">
       <note default-x="12.00" default-y="-25.00">
         <pitch>
           <step>A</step>
@@ -241,7 +241,7 @@
         <voice>1</voice>
         <type>eighth</type>
         </note>
-      <note default-x="100.56" default-y="-15.00">
+      <note default-x="111.43" default-y="-15.00">
         <pitch>
           <step>C</step>
           <octave>5</octave>
@@ -255,25 +255,19 @@
           <tied type="start"/>
           </notations>
         </note>
-      <note default-x="134.62" default-y="-15.00">
+      <note default-x="149.32" default-y="-15.00">
         <pitch>
           <step>C</step>
           <octave>5</octave>
           </pitch>
-        <duration>4</duration>
+        <duration>8</duration>
         <tie type="stop"/>
         <voice>1</voice>
-        <type>quarter</type>
+        <type>half</type>
         <stem>down</stem>
         <notations>
           <tied type="stop"/>
           </notations>
-        </note>
-      <note>
-        <rest/>
-        <duration>4</duration>
-        <voice>1</voice>
-        <type>quarter</type>
         </note>
       <barline location="right">
         <bar-style>light-heavy</bar-style>

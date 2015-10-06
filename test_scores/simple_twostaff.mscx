@@ -194,6 +194,18 @@
             <tpc>17</tpc>
             </Note>
           </Chord>
+        </Measure>
+      <Measure number="3">
+        <Chord>
+          <durationType>half</durationType>
+          <Note>
+            <pitch>67</pitch>
+            <tpc>15</tpc>
+            </Note>
+          </Chord>
+        <Rest>
+          <durationType>half</durationType>
+          </Rest>
         <BarLine>
           <subtype>end</subtype>
           <span>1</span>
@@ -280,6 +292,21 @@
             <tpc>14</tpc>
             </Note>
           </Chord>
+        </Measure>
+      <Measure number="3">
+        <Rest>
+          <durationType>quarter</durationType>
+          </Rest>
+        <Chord>
+          <durationType>half</durationType>
+          <Note>
+            <pitch>67</pitch>
+            <tpc>15</tpc>
+            </Note>
+          </Chord>
+        <Rest>
+          <durationType>quarter</durationType>
+          </Rest>
         <BarLine>
           <subtype>end</subtype>
           <span>1</span>

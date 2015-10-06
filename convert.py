@@ -81,6 +81,11 @@ for measure in part_angklung:
 
             new_note['position'] = beat_counter
 
+            if note.find('staff') is not None:
+                new_note['staff'] = int(note.find('staff').text) - 1
+            else:
+                new_note['staff'] = 0
+
             note_queue.append(new_note)
             beat_counter += new_note['duration']
 
@@ -92,29 +97,44 @@ for measure in part_angklung:
 # print(beat_counter)
 # sys.exit()
 
-music_score = [[]]
+music_score_grid = [[[]]] # music_score > staff > line
 for i in range(beat_counter):
-    music_score[0].append(0)
+    music_score_grid[0][0].append(0)
 
 while note_queue:
     note = note_queue.pop()
     if note['type'] == 'pitch':
+
+        staff = note['staff']
+        try:
+            music_score_grid[staff]
+        except IndexError:
+            music_score_grid.append([[]])
+            for i in range(beat_counter):
+                music_score_grid[staff][0].append(0)
+
         line = 0
-        while music_score[line][note['position']] != 0:
+        while music_score_grid[staff][line][note['position']] != 0:
             line += 1
             try:
-                music_score[line]
+                music_score_grid[staff][line]
             except IndexError:
-                music_score.append([])
+                music_score_grid[staff].append([])
                 for i in range(beat_counter):
-                    music_score[line].append(0)
+                    music_score_grid[staff][line].append(0)
+
         for i in range(len(key_signature_list) - 1, -1, -1):
             if note['position'] >= key_signature_list[i]['position']:
                 keysig = key_signature_list[i]['key_signature']
                 break
         else:
             raise Exception('key signature not found')
-        for i in range(note['position'], note['position'] + note['duration']):
-            music_score[line][i] = absolute2relative(keysig, note['step'], note['alter'], note['octave'])
 
-print(music_score, width=100, compact=True)
+        for i in range(note['position'], note['position'] + note['duration']):
+            music_score_grid[staff][line][i] = absolute2relative(keysig, note['step'], note['alter'], note['octave'])
+            if i == note['position']:
+                music_score_grid[staff][line][i] += '!'
+
+print(music_score_grid, width=95, compact=True)
+
+music_score_cells = []

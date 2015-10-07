@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import pprint
-print = pprint.pprint
+# print = pprint.pprint
 
 import sys
 import math
@@ -31,6 +31,7 @@ note_queue = []
 key_signature_list = []
 beat_counter = 0
 tie_start = False
+num_of_staffs = 1
 
 # import pdb;pdb.set_trace()
 
@@ -41,7 +42,7 @@ for measure in part_angklung:
                 key_signature_list.append({
                     'key_signature': int(child.find('key/fifths').text),
                     'position': beat_counter
-                    })
+                })
 
         elif child.tag == 'note':
             note = child # for easier code reading
@@ -84,7 +85,10 @@ for measure in part_angklung:
             new_note['position'] = beat_counter
 
             if note.find('staff') is not None:
-                new_note['staff'] = int(note.find('staff').text) - 1
+                staff = int(note.find('staff').text)
+                new_note['staff'] = staff - 1
+                if staff > num_of_staffs:
+                    num_of_staffs = staff
             else:
                 new_note['staff'] = 0
 
@@ -99,24 +103,24 @@ for measure in part_angklung:
 # print(beat_counter)
 # sys.exit()
 
-music_score_grid = [[[]]] # music_score > staff > line
-for i in range(beat_counter):
-    music_score_grid[0][0].append(0)
+# print(num_of_staffs)
+music_score_grid = [] # music_score > staff > line
+for i in range(num_of_staffs):
+    music_score_grid.append([[]])
+    for j in range(beat_counter):
+        music_score_grid[i][0].append(0)
 
 while note_queue:
     note = note_queue.pop()
     if note['type'] == 'pitch':
-
         staff = note['staff']
-        try:
-            music_score_grid[staff]
-        except IndexError:
-            music_score_grid.append([[]])
-            for i in range(beat_counter):
-                music_score_grid[staff][0].append(0)
-
         line = 0
-        while music_score_grid[staff][line][note['position']] != 0:
+        empty = True
+        # print(staff, line, music_score_grid)
+        for i, n in enumerate(music_score_grid[staff][line]):
+            if n != 0 and i <= note['position'] and i + int(n[1:]) > note['position']:
+                empty = False
+        while not empty:
             line += 1
             try:
                 music_score_grid[staff][line]
@@ -124,6 +128,10 @@ while note_queue:
                 music_score_grid[staff].append([])
                 for i in range(beat_counter):
                     music_score_grid[staff][line].append(0)
+            empty = True
+            for i, n in enumerate(music_score_grid[staff][line]):
+                if n != 0 and i <= note['position'] and i + int(n[1:]) > note['position']:
+                    empty = False
 
         for i in range(len(key_signature_list) - 1, -1, -1):
             if note['position'] >= key_signature_list[i]['position']:
@@ -132,11 +140,42 @@ while note_queue:
         else:
             raise Exception('key signature not found')
 
-        for i in range(note['position'], note['position'] + note['duration']):
-            music_score_grid[staff][line][i] = absolute2relative(keysig, note['step'], note['alter'], note['octave'])
-            if i == note['position']:
-                music_score_grid[staff][line][i] += '!'
+        music_score_grid[staff][line][note['position']] = absolute2relative(
+            keysig, note['step'], note['alter'], note['octave']) + str(note['duration'])
 
-print(music_score_grid, width=95, compact=True)
+# print(music_score_grid, width=95, compact=True)
+pprint.pprint(music_score_grid, width=95, compact=True)
+# sys.exit()
 
 music_score_cells = []
+line_counter = 0
+
+for staff in music_score_grid:
+    for line in music_score_grid:
+        music_score_cells.append([])
+        note_string_duration = 0
+        for note in line:
+            if note != 0:
+                note_step = note[:1]
+                note_duration = int(note[1:])
+                note_val = note_duration/divisions
+                if note_val == 0.25:
+                    note_prefix = '-='
+                elif note_val == 0.5:
+                    note_prefix = '-'
+                # elif note_val == 1/3:
+                #     note_prefix = 't'
+                elif note_val > divisions:
+                    note_prefix = ''
+                else:
+                    if note_val == 0.75:
+                        note_prefix = '?' #TODO
+                    else:
+                        raise Exception('unknown note value')
+                note_string = note_prefix + note_step
+                note_string_duration += note_duration
+                # kumpulkan dulu jadi satu ketuk baru append
+                music_score_cells[line_counter].append(note_string)
+        line_counter += 1
+
+pprint.pprint(music_score_cells, width=95, compact=True)

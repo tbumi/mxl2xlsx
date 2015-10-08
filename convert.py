@@ -6,6 +6,7 @@ import pprint
 import sys
 import math
 from copy import copy
+from collections import deque
 
 from utils import absolute2relative
 
@@ -106,7 +107,7 @@ for measure in part_angklung:
 # print(num_of_staffs)
 music_score_grid = [] # music_score > staff > line
 for i in range(num_of_staffs):
-    music_score_grid.append([[]])
+    music_score_grid.append([deque()])
     for j in range(beat_counter):
         music_score_grid[i][0].append(0)
 
@@ -116,22 +117,22 @@ while note_queue:
         staff = note['staff']
         line = 0
         empty = True
-        # print(staff, line, music_score_grid)
-        for i, n in enumerate(music_score_grid[staff][line]):
-            if n != 0 and i <= note['position'] and i + int(n[1:]) > note['position']:
+        for i in range(note['position'], note['position'] + note['duration']):
+            if music_score_grid[staff][line][i] != 0:
                 empty = False
         while not empty:
+            empty = True
             line += 1
             try:
                 music_score_grid[staff][line]
             except IndexError:
-                music_score_grid[staff].append([])
+                music_score_grid[staff].append(deque())
                 for i in range(beat_counter):
                     music_score_grid[staff][line].append(0)
-            empty = True
-            for i, n in enumerate(music_score_grid[staff][line]):
-                if n != 0 and i <= note['position'] and i + int(n[1:]) > note['position']:
-                    empty = False
+            else:
+                for i in range(note['position'], note['position'] + note['duration']):
+                    if music_score_grid[staff][line][i] != 0:
+                        empty = False
 
         for i in range(len(key_signature_list) - 1, -1, -1):
             if note['position'] >= key_signature_list[i]['position']:
@@ -140,42 +141,48 @@ while note_queue:
         else:
             raise Exception('key signature not found')
 
-        music_score_grid[staff][line][note['position']] = absolute2relative(
-            keysig, note['step'], note['alter'], note['octave']) + str(note['duration'])
+        for i in range(note['position'], note['position'] + note['duration']):
+            if i == note['position']:
+                music_score_grid[staff][line][i] = absolute2relative(keysig, note['step'], note['alter'], note['octave'])
+            else:
+                music_score_grid[staff][line][i] = '.'
 
 # print(music_score_grid, width=95, compact=True)
 pprint.pprint(music_score_grid, width=95, compact=True)
 # sys.exit()
 
 music_score_cells = []
-line_counter = 0
+line_counter = -1
 
+#import pdb;pdb.set_trace()
 for staff in music_score_grid:
-    for line in music_score_grid:
+    for line in staff:
         music_score_cells.append([])
-        note_string_duration = 0
-        for note in line:
-            if note != 0:
-                note_step = note[:1]
-                note_duration = int(note[1:])
-                note_val = note_duration/divisions
-                if note_val == 0.25:
-                    note_prefix = '-='
-                elif note_val == 0.5:
-                    note_prefix = '-'
-                # elif note_val == 1/3:
-                #     note_prefix = 't'
-                elif note_val > divisions:
-                    note_prefix = ''
-                else:
-                    if note_val == 0.75:
-                        note_prefix = '?' #TODO
-                    else:
-                        raise Exception('unknown note value')
-                note_string = note_prefix + note_step
-                note_string_duration += note_duration
-                # kumpulkan dulu jadi satu ketuk baru append
-                music_score_cells[line_counter].append(note_string)
         line_counter += 1
+        note_string = ''
+        note_duration = 0
+        while line:
+            duration = 1
+            note = line.popleft()
+            note_duration += 1
+            while line and note_duration < divisions:
+                if (note != 0 and line[0] == '.') or (note == 0 and line[0] == 0):
+                    line.popleft()
+                    duration += 1
+                    note_duration += 1
+                else:
+                    break
+            if duration/divisions == 1/4:
+                note_string += '-=' + str(note)
+            elif duration/divisions == 1/2:
+                note_string += '-' + str(note)
+            elif duration/divisions == 3/4:
+                note_string += '-' + str(note) + '-=.'
+            else:
+                note_string = str(note)
+            if note_duration == divisions:
+                music_score_cells[line_counter].append(note_string)
+                note_string = ''
+                note_duration = 0
 
 pprint.pprint(music_score_cells, width=95, compact=True)

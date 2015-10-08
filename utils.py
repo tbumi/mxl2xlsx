@@ -14,8 +14,14 @@ def absolute2relative(keysig, step, alter, octave):
 	numeral_value += alter
 	numeral_value -= 24 # karena Cgajah paling rendah
 
-	numeral_value -= step_keysig_list.index(keysig_list[keysig + 7]) - 5
+	numeral_value -= step_keysig_list.index(keysig_int2str(keysig)) - 5
 	return relative_list[numeral_value - 1]
+
+def keysig_int2str(keysig):
+	return keysig_list[keysig + 7]
+
+def keysig_int2angkl(keysig):
+	return step_keysig_list.index(keysig_int2str(keysig)) + 1
 
 if __name__ == '__main__':
 	# import sys

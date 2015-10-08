@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# [SublimeLinter flake8-max-line-length:90 @python:3]
 
 import pprint
 # print = pprint.pprint
@@ -7,30 +8,31 @@ import sys
 from copy import copy
 from collections import deque
 
-from utils import absolute2relative
+from utils import absolute2relative, keysig_int2str, keysig_int2angkl
 
 import xlsxwriter
 import xml.etree.ElementTree as ET
 try:
-    file_path = sys.argv[1] # file path as first command line argument
+    file_path = sys.argv[1]  # file path as first command line argument
 except IndexError:
     sys.exit("Error: input musicXML file as first argument.")
 
 
 mxml = ET.parse(file_path)
 score_partwise = mxml.getroot()
-#assume P1 is always angklung, (TODO: add check)
+# assume P1 is always angklung, (TODO: add check)
 part_angklung = score_partwise.find('part')
 
 attributes = part_angklung.find('measure/attributes')
 divisions = int(attributes.find('divisions').text)
 # print(divisions)
-#time_signature = attributes.find('./time') # TODO: save time signature data
+# time_signature = attributes.find('./time') # TODO: save time signature data
 
 note_queue = []
 key_signature_list = []
 beat_counter = 0
 tie_start = False
+tie_note = {}
 num_of_staffs = 1
 
 # import pdb;pdb.set_trace()
@@ -45,7 +47,7 @@ for measure in part_angklung:
                 })
 
         elif child.tag == 'note':
-            note = child # for easier code reading
+            note = child  # for easier code reading
             new_note = {}
 
             if note.find('pitch') is not None:
@@ -104,7 +106,7 @@ for measure in part_angklung:
 # sys.exit()
 
 # print(num_of_staffs)
-music_score_grid = [] # music_score > staff > line
+music_score_grid = []  # music_score > staff > line
 for i in range(num_of_staffs):
     music_score_grid.append([deque()])
     for j in range(beat_counter):
@@ -142,18 +144,19 @@ while note_queue:
 
         for i in range(note['position'], note['position'] + note['duration']):
             if i == note['position']:
-                music_score_grid[staff][line][i] = absolute2relative(keysig, note['step'], note['alter'], note['octave'])
+                music_score_grid[staff][line][i] = absolute2relative(
+                    keysig, note['step'], note['alter'], note['octave'])
             else:
                 music_score_grid[staff][line][i] = '.'
 
 # print(music_score_grid, width=95, compact=True)
-pprint.pprint(music_score_grid, width=95, compact=True)
+# pprint.pprint(music_score_grid, width=95, compact=True)
 # sys.exit()
 
 music_score_cells = []
 line_counter = -1
 
-#import pdb;pdb.set_trace()
+# import pdb;pdb.set_trace()
 for staff in music_score_grid:
     for line in staff:
         music_score_cells.append([])
@@ -188,22 +191,48 @@ pprint.pprint(music_score_cells, width=95, compact=True)
 
 workbook = xlsxwriter.Workbook('partitur.xlsx')
 worksheet = workbook.add_worksheet()
-cell_format = workbook.add_format()
-cell_format.set_font_name('Partitur')
 
+partitur_format = workbook.add_format()
+partitur_format.set_font_name('Partitur')
+partitur_format.set_font_size(12)
+partitur_format.set_align('center')
+normal_text = workbook.add_format()
+normal_text.set_font_name('Calibri')
+normal_text.set_font_size(11)
+normal_text.set_align('left')
+
+row = 0
 big_row = 0
 lines_per_big_row = len(music_score_cells) + 1
-max_cols = 4
 col_counter = 0
+beat_counter = 0
 
-for row, line in enumerate(music_score_cells):
+MAX_COLS = 4
+COLUMN_WIDTH = 4
+
+for line in music_score_cells:
     for cell in line:
-        worksheet.set_column(col_counter, col_counter, 3, cell_format)
+        for ks in key_signature_list:
+            if ks['position'] == beat_counter:
+                if row != 0:
+                    row += 1
+                worksheet.write(
+                    row, 0,
+                    'Do = {} (no. {})'.format(keysig_int2str(ks['key_signature']),
+                                              keysig_int2angkl(ks['key_signature'])),
+                    normal_text
+                )
+                row += 1
+                col_counter = 0
+        worksheet.set_column(col_counter, col_counter, COLUMN_WIDTH, partitur_format)
         worksheet.write(row + (big_row * lines_per_big_row), col_counter, cell)
-        col_counter += 1
-        if col_counter > max_cols - 1:
+        if col_counter >= MAX_COLS - 1:
             col_counter = 0
             big_row += 1
+        else:
+            col_counter += 1
+        beat_counter += 1
+    col_counter = 0
+    row += 1
 
 workbook.close()
-

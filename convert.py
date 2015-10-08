@@ -4,7 +4,6 @@ import pprint
 # print = pprint.pprint
 
 import sys
-import math
 from copy import copy
 from collections import deque
 
@@ -186,3 +185,25 @@ for staff in music_score_grid:
                 note_duration = 0
 
 pprint.pprint(music_score_cells, width=95, compact=True)
+
+workbook = xlsxwriter.Workbook('partitur.xlsx')
+worksheet = workbook.add_worksheet()
+cell_format = workbook.add_format()
+cell_format.set_font_name('Partitur')
+
+big_row = 0
+lines_per_big_row = len(music_score_cells) + 1
+max_cols = 4
+col_counter = 0
+
+for row, line in enumerate(music_score_cells):
+    for cell in line:
+        worksheet.set_column(col_counter, col_counter, 3, cell_format)
+        worksheet.write(row + (big_row * lines_per_big_row), col_counter, cell)
+        col_counter += 1
+        if col_counter > max_cols - 1:
+            col_counter = 0
+            big_row += 1
+
+workbook.close()
+

@@ -187,7 +187,7 @@ for staff in music_score_grid:
                 note_string = ''
                 note_duration = 0
 
-pprint.pprint(music_score_cells, width=95, compact=True)
+#pprint.pprint(music_score_cells, width=95, compact=True)
 
 workbook = xlsxwriter.Workbook('partitur.xlsx')
 worksheet = workbook.add_worksheet()
@@ -201,38 +201,40 @@ normal_text.set_font_name('Calibri')
 normal_text.set_font_size(11)
 normal_text.set_align('left')
 
-row = 0
-big_row = 0
-lines_per_big_row = len(music_score_cells) + 1
-col_counter = 0
-beat_counter = 0
-
-MAX_COLS = 4
+MAX_COLS = 6
 COLUMN_WIDTH = 4
+lines_per_big_row = len(music_score_cells) + 1
+offset = 0
 
-for line in music_score_cells:
+key_signature_queue = deque(key_signature_list)
+
+for line_num, line in enumerate(music_score_cells):
+    big_row = 0
+    col_counter = 0
+    cur_beat = 0
     for cell in line:
-        for ks in key_signature_list:
-            if ks['position'] == beat_counter:
-                if row != 0:
-                    row += 1
-                worksheet.write(
-                    row, 0,
-                    'Do = {} (no. {})'.format(keysig_int2str(ks['key_signature']),
-                                              keysig_int2angkl(ks['key_signature'])),
-                    normal_text
-                )
-                row += 1
+        cur_row = line_num + (big_row * lines_per_big_row) + offset
+        if key_signature_queue and key_signature_queue[0]['position'] == cur_beat:
+            ks = key_signature_queue.popleft()
+            if col_counter != 0:
                 col_counter = 0
+                big_row += 1
+                cur_row = line_num + (big_row * lines_per_big_row) + offset
+            worksheet.write(
+                cur_row, 0,
+                'Do = {} (no. {})'.format(keysig_int2str(ks['key_signature']),
+                                          keysig_int2angkl(ks['key_signature'])),
+                normal_text
+            )
+            offset += 1
+            cur_row += 1
         worksheet.set_column(col_counter, col_counter, COLUMN_WIDTH, partitur_format)
-        worksheet.write(row + (big_row * lines_per_big_row), col_counter, cell)
+        worksheet.write(cur_row, col_counter, cell)
+        cur_beat += 1
         if col_counter >= MAX_COLS - 1:
             col_counter = 0
             big_row += 1
         else:
             col_counter += 1
-        beat_counter += 1
-    col_counter = 0
-    row += 1
 
 workbook.close()

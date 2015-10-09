@@ -20,16 +20,17 @@ except IndexError:
 
 mxml = ET.parse(file_path)
 score_partwise = mxml.getroot()
+title = score_partwise.find('work/work-title').text
 # assume P1 is always angklung, (TODO: add check)
 part_angklung = score_partwise.find('part')
 
 attributes = part_angklung.find('measure/attributes')
 divisions = int(attributes.find('divisions').text)
 # print(divisions)
-# time_signature = attributes.find('./time') # TODO: save time signature data
 
 note_queue = []
 key_signature_list = []
+time_signature_list = []
 beat_counter = 0
 tie_start = False
 tie_note = {}
@@ -43,6 +44,11 @@ for measure in part_angklung:
             if child.find('key/fifths') is not None:
                 key_signature_list.append({
                     'key_signature': int(child.find('key/fifths').text),
+                    'position': beat_counter
+                })
+            if child.find('time/beats') is not None:
+                time_signature_list.append({
+                    'beats': int(child.find('time/beats').text),
                     'position': beat_counter
                 })
 
@@ -200,6 +206,11 @@ normal_text = workbook.add_format()
 normal_text.set_font_name('Calibri')
 normal_text.set_font_size(11)
 normal_text.set_align('left')
+normal_text.set_bold()
+title_text = workbook.add_format()
+title_text.set_font_size(18)
+title_text.set_align('center')
+title_text.set_bold()
 
 MAX_COLS = 6
 COLUMN_WIDTH = 4
@@ -208,6 +219,8 @@ offset = 0
 
 key_signature_queue = deque(key_signature_list)
 
+worksheet.merge_range(0, 0, 0, MAX_COLS - 1, title, title_text)
+offset += 2
 for line_num, line in enumerate(music_score_cells):
     big_row = 0
     col_counter = 0

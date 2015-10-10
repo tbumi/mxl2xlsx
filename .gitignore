@@ -3,3 +3,8 @@ lib/
 include/
 .Python
 pip-selfcheck.json
+.*,
+__pycache__/
+*.swp
+*.xlsx
+*.pyc

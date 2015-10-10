@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # [SublimeLinter flake8-max-line-length:90 @python:3]
 
-import pprint
+# import pprint
 # print = pprint.pprint
 
 import sys
@@ -20,6 +20,8 @@ except IndexError:
 
 mxml = ET.parse(file_path)
 score_partwise = mxml.getroot()
+if score_partwise.tag != 'score-partwise':
+    sys.exit("Only accepts MusicXML in score-partwise format.")
 title = score_partwise.find('work/work-title').text
 # assume P1 is always angklung, (TODO: add check)
 part_angklung = score_partwise.find('part')
@@ -44,12 +46,12 @@ for measure in part_angklung:
             if child.find('key/fifths') is not None:
                 key_signature_list.append({
                     'key_signature': int(child.find('key/fifths').text),
-                    'position': beat_counter
+                    'position': beat_counter//divisions
                 })
             if child.find('time/beats') is not None:
                 time_signature_list.append({
                     'beats': int(child.find('time/beats').text),
-                    'position': beat_counter
+                    'position': beat_counter//divisions
                 })
 
         elif child.tag == 'note':
@@ -141,9 +143,9 @@ while note_queue:
                     if music_score_grid[staff][line][i] != 0:
                         empty = False
 
-        for i in range(len(key_signature_list) - 1, -1, -1):
-            if note['position'] >= key_signature_list[i]['position']:
-                keysig = key_signature_list[i]['key_signature']
+        for ks in reversed(key_signature_list):
+            if note['position']//divisions >= ks['position']:
+                keysig = ks['key_signature']
                 break
         else:
             raise Exception('key signature not found')
@@ -193,57 +195,88 @@ for staff in music_score_grid:
                 note_string = ''
                 note_duration = 0
 
-#pprint.pprint(music_score_cells, width=95, compact=True)
+# pprint.pprint(music_score_cells, width=95, compact=True)
 
 workbook = xlsxwriter.Workbook('partitur.xlsx')
 worksheet = workbook.add_worksheet()
 
-partitur_format = workbook.add_format()
-partitur_format.set_font_name('Partitur')
-partitur_format.set_font_size(12)
-partitur_format.set_align('center')
-normal_text = workbook.add_format()
-normal_text.set_font_name('Calibri')
-normal_text.set_font_size(11)
-normal_text.set_align('left')
-normal_text.set_bold()
-title_text = workbook.add_format()
-title_text.set_font_size(18)
-title_text.set_align('center')
-title_text.set_bold()
+partitur_format = {
+    'font_name': 'Partitur',
+    'font_size': 12,
+    'align': 'center'
+}
+normal_text_format = {
+    'font_name': 'Calibri',
+    'font_size': 11,
+    'align': 'left',
+    'bold': True
+}
+title_text_format = {
+    'font_name': 'Cambria',
+    'font_size': 20,
+    'align': 'center',
+    'bold': True
+}
+partitur_text = workbook.add_format(partitur_format)
+normal_text = workbook.add_format(normal_text_format)
+title_text = workbook.add_format(title_text_format)
 
-MAX_COLS = 6
-COLUMN_WIDTH = 4
+partitur_format_lborder = copy(partitur_format)
+partitur_format_lborder['left'] = 1
+partitur_text_lborder = workbook.add_format(partitur_format_lborder)
+
+partitur_format_rborder = copy(partitur_format)
+partitur_format_rborder['right'] = 1
+partitur_text_rborder = workbook.add_format(partitur_format_rborder)
+
+MAX_COLS = 8
+COLUMN_WIDTH_IN_EXCEL = 4
 lines_per_big_row = len(music_score_cells) + 1
-offset = 0
 
-key_signature_queue = deque(key_signature_list)
+time_signature_queue = deque(time_signature_list)
+cur_time_signature = 4
 
+# write the title
 worksheet.merge_range(0, 0, 0, MAX_COLS - 1, title, title_text)
-offset += 2
+
 for line_num, line in enumerate(music_score_cells):
     big_row = 0
     col_counter = 0
-    cur_beat = 0
-    for cell in line:
+    offset = 2
+    for cur_beat, cell in enumerate(line):
         cur_row = line_num + (big_row * lines_per_big_row) + offset
-        if key_signature_queue and key_signature_queue[0]['position'] == cur_beat:
-            ks = key_signature_queue.popleft()
-            if col_counter != 0:
-                col_counter = 0
-                big_row += 1
+
+        for ks in reversed(key_signature_list):
+            if cur_beat == ks['position']:
+                if col_counter != 0:
+                    col_counter = 0
+                    big_row += 1
+                    cur_row = line_num + (big_row * lines_per_big_row) + offset
+                if line_num == 0:
+                    worksheet.write(
+                        cur_row, col_counter,
+                        'Do = {} (no. {})'.format(keysig_int2str(ks['key_signature']),
+                                                  keysig_int2angkl(ks['key_signature'])),
+                        normal_text
+                    )
+                offset += 1
                 cur_row = line_num + (big_row * lines_per_big_row) + offset
-            worksheet.write(
-                cur_row, 0,
-                'Do = {} (no. {})'.format(keysig_int2str(ks['key_signature']),
-                                          keysig_int2angkl(ks['key_signature'])),
-                normal_text
-            )
-            offset += 1
-            cur_row += 1
-        worksheet.set_column(col_counter, col_counter, COLUMN_WIDTH, partitur_format)
-        worksheet.write(cur_row, col_counter, cell)
-        cur_beat += 1
+                break
+
+        if time_signature_queue and time_signature_queue[0]['position'] == cur_beat:
+            ts = time_signature_queue.popleft()
+            cur_time_signature = ts['beats']
+            format_partitur_text = partitur_text_lborder
+        elif col_counter == 0 and cur_beat % cur_time_signature == 0:
+            format_partitur_text = partitur_text_lborder
+        elif (cur_beat + 1) % cur_time_signature == 0:
+            format_partitur_text = partitur_text_rborder
+        else:
+            format_partitur_text = partitur_text
+
+        worksheet.set_column(col_counter, col_counter, COLUMN_WIDTH_IN_EXCEL)
+        worksheet.write(cur_row, col_counter, cell, format_partitur_text)
+
         if col_counter >= MAX_COLS - 1:
             col_counter = 0
             big_row += 1

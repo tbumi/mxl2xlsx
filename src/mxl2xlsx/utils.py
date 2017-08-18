@@ -22,16 +22,3 @@ def keysig_int2str(keysig):
 
 def keysig_int2angkl(keysig):
 	return step_keysig_list.index(keysig_int2str(keysig)) + 1
-
-if __name__ == '__main__':
-	# import sys
-	# n = absolute2relative(int(sys.argv[1]), sys.argv[2], int(sys.argv[3]), int(sys.argv[4]))
-	# print(n)
-
-	assert absolute2relative(0, 'C', 0, 2) == 'Z'
-	assert absolute2relative(0, 'C', 0, 4) == 'q'
-	assert absolute2relative(0, 'D', 0, 4) == 'w'
-	assert absolute2relative(0, 'D', 1, 4) == '3'
-	assert absolute2relative(0, 'B', -1, 4) == '7'
-	assert absolute2relative(-5, 'C', 0, 4) == 'm'
-	assert absolute2relative(1, 'C', 0, 4) == 'r'

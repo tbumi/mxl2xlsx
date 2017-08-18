@@ -1,8 +1,4 @@
 #!/usr/bin/env python
-# [SublimeLinter flake8-max-line-length:90 @python:3]
-
-# import pprint
-# print = pprint.pprint
 
 import sys
 from copy import copy
@@ -28,7 +24,6 @@ part_angklung = score_partwise.find('part')
 
 attributes = part_angklung.find('measure/attributes')
 divisions = int(attributes.find('divisions').text)
-# print(divisions)
 
 note_queue = []
 key_signature_list = []
@@ -37,8 +32,6 @@ beat_counter = 0
 tie_start = False
 tie_note = {}
 num_of_staffs = 1
-
-# import pdb;pdb.set_trace()
 
 for measure in part_angklung:
     for child in measure:
@@ -69,7 +62,6 @@ for measure in part_angklung:
             elif note.find('rest') is not None:
                 new_note['type'] = 'rest'
             else:
-                # import pdb;pdb.set_trace()
                 sys.exit("Invalid MusicXML")
 
             new_note['duration'] = int(note.find('duration').text)
@@ -164,7 +156,6 @@ while note_queue:
 music_score_cells = []
 line_counter = -1
 
-# import pdb;pdb.set_trace()
 for staff in music_score_grid:
     for line in staff:
         music_score_cells.append([])

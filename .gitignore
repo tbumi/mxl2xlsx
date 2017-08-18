@@ -1,10 +1,15 @@
 bin/
 lib/
+lib64
 include/
+share/
 .Python
 pip-selfcheck.json
-.*,
+pyvenv.cfg
 __pycache__/
+*.pyc
+.cache/
+*.egg-info/
+.*,
 *.swp
 *.xlsx
-*.pyc

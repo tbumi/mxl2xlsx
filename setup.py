@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     name='mxl2xlsx',
 
-    version='0.1.0',
+    version='0.2',
 
     description='A tool to convert MusicXML files to Excel partitur',
 
@@ -25,9 +25,15 @@ setup(
     package_dir={'': 'src'},
     packages=find_packages(where='src', exclude=['docs', 'tests']),
 
+    install_requires=['click', 'xlsxwriter'],
+
+    setup_requires=['pytest-runner'],
+
+    tests_require=['pytest'],
+
     entry_points={
         'console_scripts': [
-            'mxl2xlsx=mxl2xlsx:main',
+            'mxl2xlsx=mxl2xlsx.convert:main',
         ],
     },
 )

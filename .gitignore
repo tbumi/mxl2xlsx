@@ -9,7 +9,9 @@ pyvenv.cfg
 __pycache__/
 *.pyc
 .cache/
+.eggs/
 *.egg-info/
 .*,
 *.swp
 *.xlsx
+*.sublime-*

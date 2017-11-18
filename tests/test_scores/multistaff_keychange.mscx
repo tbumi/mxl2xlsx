@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <museScore version="2.06">
-  <programVersion>2.0.2</programVersion>
-  <programRevision>f51dc11</programRevision>
+  <programVersion>2.1.0</programVersion>
+  <programRevision>871c8ce</programRevision>
   <Score>
     <LayerTag id="0" tag="default"></LayerTag>
     <currentLayer>0</currentLayer>
@@ -191,8 +191,10 @@
         <Chord>
           <durationType>quarter</durationType>
           <Note>
-            <pitch>67</pitch>
-            <tpc>15</tpc>
+            <Tie id="2">
+              </Tie>
+            <pitch>65</pitch>
+            <tpc>13</tpc>
             </Note>
           </Chord>
         </Measure>
@@ -200,6 +202,7 @@
         <Chord>
           <durationType>eighth</durationType>
           <Note>
+            <endSpanner id="2"/>
             <pitch>65</pitch>
             <tpc>13</tpc>
             </Note>
@@ -330,23 +333,43 @@
           <sigD>4</sigD>
           <showCourtesySig>1</showCourtesySig>
           </TimeSig>
-        <Rest>
-          <durationType>measure</durationType>
-          <duration z="4" n="4"/>
-          </Rest>
+        <Chord>
+          <durationType>whole</durationType>
+          <Note>
+            <Tie id="3">
+              </Tie>
+            <pitch>65</pitch>
+            <tpc>13</tpc>
+            </Note>
+          <Note>
+            <Tie id="4">
+              </Tie>
+            <pitch>69</pitch>
+            <tpc>17</tpc>
+            </Note>
+          <Note>
+            <Tie id="5">
+              </Tie>
+            <pitch>72</pitch>
+            <tpc>14</tpc>
+            </Note>
+          </Chord>
         </Measure>
       <Measure number="2">
         <Chord>
           <durationType>half</durationType>
           <Note>
+            <endSpanner id="3"/>
             <pitch>65</pitch>
             <tpc>13</tpc>
             </Note>
           <Note>
+            <endSpanner id="4"/>
             <pitch>69</pitch>
             <tpc>17</tpc>
             </Note>
           <Note>
+            <endSpanner id="5"/>
             <pitch>72</pitch>
             <tpc>14</tpc>
             </Note>
@@ -487,34 +510,10 @@
           <sigD>4</sigD>
           <showCourtesySig>1</showCourtesySig>
           </TimeSig>
-        <Chord>
-          <durationType>quarter</durationType>
-          <Note>
-            <pitch>45</pitch>
-            <tpc>17</tpc>
-            </Note>
-          </Chord>
-        <Chord>
-          <durationType>quarter</durationType>
-          <Note>
-            <pitch>48</pitch>
-            <tpc>14</tpc>
-            </Note>
-          </Chord>
-        <Chord>
-          <durationType>quarter</durationType>
-          <Note>
-            <pitch>47</pitch>
-            <tpc>19</tpc>
-            </Note>
-          </Chord>
-        <Chord>
-          <durationType>quarter</durationType>
-          <Note>
-            <pitch>52</pitch>
-            <tpc>18</tpc>
-            </Note>
-          </Chord>
+        <Rest>
+          <durationType>measure</durationType>
+          <duration z="4" n="4"/>
+          </Rest>
         </Measure>
       <Measure number="2">
         <Chord>
@@ -541,8 +540,10 @@
         <Chord>
           <durationType>quarter</durationType>
           <Note>
-            <pitch>50</pitch>
-            <tpc>16</tpc>
+            <Tie id="6">
+              </Tie>
+            <pitch>48</pitch>
+            <tpc>14</tpc>
             </Note>
           </Chord>
         </Measure>
@@ -550,6 +551,7 @@
         <Chord>
           <durationType>quarter</durationType>
           <Note>
+            <endSpanner id="6"/>
             <pitch>48</pitch>
             <tpc>14</tpc>
             </Note>

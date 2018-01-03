@@ -9,3 +9,4 @@ def test_absolute2relative():
     assert utils.absolute2relative(0, 'B', -1, 4) == '7'
     assert utils.absolute2relative(-5, 'C', 0, 4) == 'm'
     assert utils.absolute2relative(1, 'C', 0, 4) == 'r'
+    assert utils.absolute2relative(-1, 'E', 0, 2) == 'M'

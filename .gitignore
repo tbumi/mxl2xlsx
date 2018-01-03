@@ -13,5 +13,5 @@ __pycache__/
 *.egg-info/
 .*,
 *.swp
-*.xlsx
 *.sublime-*
+*.test.xlsx

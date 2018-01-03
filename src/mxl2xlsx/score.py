@@ -170,12 +170,11 @@ def parse_mxl(mxml):
                     note_duration = 0
 
     lines_per_big_row = len(music_score_cells) + 1
-    time_signature_queue = deque(time_signature_list)
-    cur_time_signature = 4
 
     excel_grid = []
 
     for line_num, line_entries in enumerate(music_score_cells):
+        time_signature_queue = deque(time_signature_list)
         big_row = 0
         col_counter = 0
         offset = 2
@@ -206,10 +205,13 @@ def parse_mxl(mxml):
             if time_signature_queue and time_signature_queue[0]['position'] == cur_beat:
                 ts = time_signature_queue.popleft()
                 cur_time_signature = ts['beats']
+
+            is_leftmost_in_bar = (cur_beat - ts['position']) % cur_time_signature == 0
+            is_rightmost_in_bar = (
+                cur_beat - ts['position'] + 1) % cur_time_signature == 0
+            if col_counter == 0 and is_leftmost_in_bar:
                 cell['format'] = 'partitur_lborder'
-            elif col_counter == 0 and cur_beat % cur_time_signature == 0:
-                cell['format'] = 'partitur_lborder'
-            elif (cur_beat + 1) % cur_time_signature == 0:
+            elif is_rightmost_in_bar:
                 cell['format'] = 'partitur_rborder'
             else:
                 cell['format'] = 'partitur'
@@ -223,7 +225,7 @@ def parse_mxl(mxml):
             excel_grid[cur_row][col_counter] = cell
 
             if col_counter >= MAX_COLS - 1 or \
-                    (cur_beat + 1) % cur_time_signature == 0 and \
+                    is_rightmost_in_bar and \
                     col_counter + cur_time_signature >= MAX_COLS - 1:
                 col_counter = 0
                 big_row += 1

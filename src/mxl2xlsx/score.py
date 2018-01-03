@@ -233,4 +233,13 @@ def parse_mxl(mxml):
                 col_counter += 1
             cur_beat += 1
 
+    # delete rows that only contain 0
+    cur_row = 0
+    while cur_row < len(excel_grid):
+        row_entries = excel_grid[cur_row]
+        if row_entries and all(cell['text'] == '0' for cell in row_entries):
+            del excel_grid[cur_row]
+        else:
+            cur_row += 1
+
     return excel_grid

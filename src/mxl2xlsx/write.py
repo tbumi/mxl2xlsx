@@ -1,55 +1,48 @@
-import xlsxwriter
+from openpyxl import Workbook
+from openpyxl.styles import Border, Side, Alignment, Font
+from openpyxl.utils import get_column_letter
 
 COLUMN_WIDTH_IN_EXCEL = 4
 
 
 def write_to_excel(file_path, excel_grid, title):
-    workbook = xlsxwriter.Workbook(file_path)
-    worksheet = workbook.add_worksheet()
+    workbook = Workbook()
+    worksheet = workbook.active
 
-    partitur_format = {
-        'font_name': 'Partitur',
-        'font_size': 12,
-        'align': 'center'
-    }
-    normal_text_format = {
-        'font_name': 'Calibri',
-        'font_size': 11,
-        'align': 'left',
-        'bold': True
-    }
-    title_text_format = {
-        'font_name': 'Cambria',
-        'font_size': 20,
-        'align': 'center',
-        'bold': True
-    }
-    partitur_text = workbook.add_format(partitur_format)
-    normal_text = workbook.add_format(normal_text_format)
-    title_text = workbook.add_format(title_text_format)
-
-    partitur_format_lborder = partitur_format.copy()
-    partitur_format_lborder['left'] = 1
-    partitur_text_lborder = workbook.add_format(partitur_format_lborder)
-
-    partitur_format_rborder = partitur_format.copy()
-    partitur_format_rborder['right'] = 1
-    partitur_text_rborder = workbook.add_format(partitur_format_rborder)
+    partitur_font = Font(name='Partitur', size=12)
+    normal_text_font = Font(name='Calibri', size=11, bold=True)
+    title_text_font = Font(name='Cambria', size=20, bold=True)
+    center_alignment = Alignment(horizontal='center')
+    left_alignment = Alignment(horizontal='left')
+    left_border = Border(left=Side(style='thin'))
+    right_border = Border(right=Side(style='thin'))
 
     # write the title
-    worksheet.merge_range(
-        0, 0, 0, max(len(line) for line in excel_grid) - 1, title, title_text)
+    worksheet.merge_cells(
+        start_row=1, start_column=1, end_row=1,
+        end_column=max(len(line) for line in excel_grid))
+    tc = worksheet.cell(row=1, column=1, value=title)
+    tc.font = title_text_font
+    tc.alignment = center_alignment
 
     for row_num, row_entries in enumerate(excel_grid):
         for col_num, col_entries in enumerate(row_entries):
-            worksheet.set_column(col_num, col_num, COLUMN_WIDTH_IN_EXCEL)
-            format_partitur_text = {
-                'normal': normal_text,
-                'partitur': partitur_text,
-                'partitur_lborder': partitur_text_lborder,
-                'partitur_rborder': partitur_text_rborder,
-            }[col_entries['format']]
-            worksheet.write(
-                row_num, col_num, col_entries['text'], format_partitur_text)
+            worksheet.column_dimensions[get_column_letter(col_num+1)].width = COLUMN_WIDTH_IN_EXCEL
+            c = worksheet.cell(
+                row=row_num+1, column=col_num+1, value=col_entries['text'])
+            if col_entries['format'] == 'partitur':
+                c.font = partitur_font
+                c.alignment = center_alignment
+            elif col_entries['format'] == 'partitur_lborder':
+                c.font = partitur_font
+                c.alignment = center_alignment
+                c.border = left_border
+            elif col_entries['format'] == 'partitur_rborder':
+                c.font = partitur_font
+                c.alignment = center_alignment
+                c.border = right_border
+            else:
+                c.font = normal_text_font
+                c.alignment = left_alignment
 
-    workbook.close()
+    workbook.save(file_path)
